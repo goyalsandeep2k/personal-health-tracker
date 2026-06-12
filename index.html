@@ -811,6 +811,71 @@
     </div>
   </div>
 
+  <!-- ── GLUCOSE + SLEEP ── -->
+  <div class="section-title">Metabolic & Sleep Data</div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-label">Fasting Glucose — June 2026</div>
+      <div class="card-value" style="color:#f59e0b;margin-top:6px;">98 <span class="card-unit">mg/dL</span></div>
+      <div style="margin-top:14px;">
+        <div class="bar-wrap">
+          <div class="bar-label"><span>Your value: 98</span><span style="color:#f59e0b">High-Normal</span></div>
+          <div class="bar-bg"><div class="bar-fill bar-yellow" style="width:72%"></div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px;font-size:0.75rem;text-align:center;">
+          <div style="background:#22c55e20;border:1px solid #22c55e40;border-radius:6px;padding:6px;">
+            <div style="color:#22c55e;font-weight:700;">&lt;100</div><div style="color:var(--muted);">Normal</div>
+          </div>
+          <div style="background:#f59e0b20;border:1px solid #f59e0b40;border-radius:6px;padding:6px;">
+            <div style="color:#f59e0b;font-weight:700;">100–125</div><div style="color:var(--muted);">Pre-diabetes</div>
+          </div>
+          <div style="background:#ef444420;border:1px solid #ef444440;border-radius:6px;padding:6px;">
+            <div style="color:#ef4444;font-weight:700;">&gt;126</div><div style="color:var(--muted);">Diabetes</div>
+          </div>
+        </div>
+      </div>
+      <div class="alert alert-yellow" style="margin-top:12px;">
+        <span class="alert-icon">⚠️</span>
+        <div><strong>98 is technically normal but only 2 points from pre-diabetes.</strong> With rising triglycerides (125), VAT at 3.71 lbs, and high TSH — this is a leading indicator of insulin resistance. HbA1c needed for full picture. Target is &lt;85 for optimal metabolic health.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Sleep — Fitbit (May 29, 2026)</div>
+      <div style="display:flex;align-items:baseline;gap:10px;margin-top:6px;">
+        <div class="card-value" style="color:#22c55e;">8h 16m</div>
+        <span style="background:#22c55e20;border:1px solid #22c55e40;color:#22c55e;padding:2px 8px;border-radius:10px;font-size:0.72rem;font-weight:700;">Goal Met ✅</span>
+      </div>
+      <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px;">
+        <div class="bar-wrap">
+          <div class="bar-label"><span>🟣 Deep Sleep</span><span style="color:#22c55e">1h 24m (17%)</span></div>
+          <div class="bar-bg"><div class="bar-fill" style="width:17%;background:#7c3aed;border-radius:4px;height:100%"></div></div>
+        </div>
+        <div class="bar-wrap">
+          <div class="bar-label"><span>🔵 Light Sleep</span><span style="color:var(--label)">5h 16m (64%)</span></div>
+          <div class="bar-bg"><div class="bar-fill bar-blue" style="width:64%"></div></div>
+        </div>
+        <div class="bar-wrap">
+          <div class="bar-label"><span>🩵 REM Sleep</span><span style="color:#06b6d4">1h 35m (19%)</span></div>
+          <div class="bar-bg"><div class="bar-fill" style="width:19%;background:#06b6d4;border-radius:4px;height:100%"></div></div>
+        </div>
+        <div class="bar-wrap">
+          <div class="bar-label"><span>🔴 Awake</span><span style="color:var(--muted)">23 min</span></div>
+          <div class="bar-bg"><div class="bar-fill" style="width:5%;background:#ef4444;border-radius:4px;height:100%"></div></div>
+        </div>
+        <div class="bar-wrap">
+          <div class="bar-label"><span>Restlessness</span><span style="color:var(--muted)">24 min</span></div>
+          <div class="bar-bg"><div class="bar-fill bar-yellow" style="width:5%"></div></div>
+        </div>
+      </div>
+      <div class="alert alert-green" style="margin-top:12px;">
+        <span class="alert-icon">✅</span>
+        <div>Excellent sleep. Deep sleep (1h 24m) is in ideal range (15–25%). REM slightly below optimal but normal. Total 8h 16m is ideal for recovery. No signs of sleep apnea pattern. O₂ sat 100% confirms this.</div>
+      </div>
+    </div>
+  </div>
+
   <!-- ── RECOMMENDED LABS ── -->
   <div class="section-title">Recommended Lab Tests (Not Yet Recorded)</div>
   <div class="grid-2">
@@ -818,7 +883,7 @@
       <div class="card-label" style="margin-bottom:10px;">Priority Labs</div>
       <div style="font-size:0.85rem; display:flex; flex-direction:column; gap:8px;">
         <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--border)">
-          <span>HbA1c / Fasting Glucose</span><span style="color:#f97316">HIGH PRIORITY</span>
+          <span>HbA1c <span style="color:var(--muted);font-size:0.75rem">(glucose 98 — borderline)</span></span><span style="color:#f97316">HIGH PRIORITY</span>
         </div>
         <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--border)">
           <span>ApoB</span><span style="color:#f97316">HIGH PRIORITY</span>
