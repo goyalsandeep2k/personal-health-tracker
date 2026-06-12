@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sandeep Goyal — Personal Health Dashboard</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --card: #1e2230;
+    --border: #2a2f45;
+    --accent: #4f8ef7;
+    --accent2: #a78bfa;
+    --green: #22c55e;
+    --yellow: #f59e0b;
+    --red: #ef4444;
+    --orange: #f97316;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --label: #94a3b8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; }
+
+  header {
+    background: linear-gradient(135deg, #1e2230 0%, #151826 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 28px 40px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  header h1 { font-size: 1.5rem; font-weight: 700; color: #fff; }
+  header p { color: var(--muted); font-size: 0.85rem; margin-top: 2px; }
+  .badge { background: #22c55e22; border: 1px solid #22c55e55; color: #22c55e; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+
+  main { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+
+  .section-title {
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--muted);
+    margin: 36px 0 16px; padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Grid layouts */
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  @media (max-width: 900px) { .grid-3, .grid-4 { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .grid-3, .grid-4, .grid-2 { grid-template-columns: 1fr; } }
+
+  /* Stat card */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .card-label { font-size: 0.72rem; color: var(--label); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+  .card-value { font-size: 2rem; font-weight: 700; line-height: 1; }
+  .card-unit { font-size: 0.9rem; color: var(--muted); margin-left: 4px; }
+  .card-sub { font-size: 0.78rem; color: var(--muted); margin-top: 6px; }
+  .card-sub.warn { color: var(--orange); }
+  .card-sub.good { color: var(--green); }
+  .card-sub.bad { color: var(--red); }
+
+  .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+  .dot-green { background: var(--green); }
+  .dot-yellow { background: var(--yellow); }
+  .dot-red { background: var(--red); }
+  .dot-orange { background: var(--orange); }
+
+  /* DEXA scan card */
+  .scan-header {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .scan-header h3 { font-size: 1rem; font-weight: 600; }
+  .scan-header .date { color: var(--muted); font-size: 0.82rem; }
+  .scan-badge { background: #4f8ef722; border: 1px solid #4f8ef755; color: var(--accent); padding: 3px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: 600; }
+
+  /* Progress bar */
+  .bar-wrap { margin: 8px 0; }
+  .bar-label { display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--label); margin-bottom: 4px; }
+  .bar-bg { background: #ffffff10; border-radius: 4px; height: 8px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+  .bar-green { background: linear-gradient(90deg, #22c55e, #16a34a); }
+  .bar-yellow { background: linear-gradient(90deg, #f59e0b, #d97706); }
+  .bar-orange { background: linear-gradient(90deg, #f97316, #ea580c); }
+  .bar-red { background: linear-gradient(90deg, #ef4444, #dc2626); }
+  .bar-blue { background: linear-gradient(90deg, #4f8ef7, #3b82f6); }
+  .bar-purple { background: linear-gradient(90deg, #a78bfa, #7c3aed); }
+
+  /* Regional table */
+  .region-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  .region-table th { text-align: left; padding: 8px 12px; color: var(--muted); font-size: 0.72rem; font-weight: 600; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+  .region-table td { padding: 10px 12px; border-bottom: 1px solid #ffffff08; }
+  .region-table tr:last-child td { border-bottom: none; }
+  .region-table tr.total td { font-weight: 700; color: #fff; border-top: 1px solid var(--border); }
+
+  /* Alert box */
+  .alert { border-radius: 10px; padding: 14px 18px; margin: 8px 0; font-size: 0.84rem; display: flex; gap: 10px; align-items: flex-start; }
+  .alert-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+  .alert-red { background: #ef444415; border: 1px solid #ef444430; }
+  .alert-orange { background: #f9731615; border: 1px solid #f9731630; }
+  .alert-yellow { background: #f59e0b15; border: 1px solid #f59e0b30; }
+  .alert-green { background: #22c55e15; border: 1px solid #22c55e30; }
+
+  /* Vitals pill */
+  .vitals-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+  .vital-pill { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; display: flex; flex-direction: column; align-items: center; min-width: 100px; }
+  .vital-pill .vp-val { font-size: 1.3rem; font-weight: 700; }
+  .vital-pill .vp-label { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; margin-top: 2px; }
+
+  /* Timeline */
+  .timeline { position: relative; padding-left: 24px; }
+  .timeline::before { content: ''; position: absolute; left: 6px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+  .tl-item { position: relative; margin-bottom: 20px; }
+  .tl-dot { position: absolute; left: -21px; top: 4px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--bg); }
+  .tl-dot-blue { background: var(--accent); }
+  .tl-dot-gray { background: var(--border); }
+  .tl-date { font-size: 0.72rem; color: var(--muted); margin-bottom: 2px; }
+  .tl-title { font-size: 0.9rem; font-weight: 600; }
+  .tl-sub { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+
+  /* Percentile chip */
+  .pct-chip { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.72rem; font-weight: 700; margin-left: 8px; }
+  .pct-bad { background: #ef444420; color: #ef4444; }
+  .pct-ok { background: #f59e0b20; color: #f59e0b; }
+  .pct-good { background: #22c55e20; color: #22c55e; }
+
+  footer { text-align: center; color: var(--muted); font-size: 0.75rem; padding: 40px; border-top: 1px solid var(--border); margin-top: 60px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Sandeep Goyal — Health Dashboard</h1>
+    <p>Personal health tracking · DEXA scans, vitals, and body composition over time</p>
+  </div>
+  <span class="badge">Private</span>
+</header>
+
+<main>
+
+  <!-- ── CURRENT VITALS ── -->
+  <div class="section-title">Current Vitals — June 2026</div>
+  <div class="grid-4">
+    <div class="card">
+      <div class="card-label">Blood Pressure</div>
+      <div class="card-value" style="color:#22c55e">115<span class="card-unit">/66</span></div>
+      <div class="card-sub good"><span class="status-dot dot-green"></span>Excellent — optimal range</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Resting Heart Rate</div>
+      <div class="card-value" style="color:#22c55e">58<span class="card-unit">bpm</span></div>
+      <div class="card-sub good"><span class="status-dot dot-green"></span>Athletic / very fit range</div>
+    </div>
+    <div class="card">
+      <div class="card-label">O₂ Saturation</div>
+      <div class="card-value" style="color:#22c55e">100<span class="card-unit">%</span></div>
+      <div class="card-sub good"><span class="status-dot dot-green"></span>Perfect</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Temperature</div>
+      <div class="card-value" style="color:#22c55e">98.2<span class="card-unit">°F</span></div>
+      <div class="card-sub good"><span class="status-dot dot-green"></span>Normal</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Weight</div>
+      <div class="card-value" style="color:#f59e0b">240<span class="card-unit">lbs</span></div>
+      <div class="card-sub warn">+9 lbs since DEXA (Jun 2023)</div>
+    </div>
+    <div class="card">
+      <div class="card-label">BMI</div>
+      <div class="card-value" style="color:#f97316">33.52</div>
+      <div class="card-sub warn"><span class="status-dot dot-orange"></span>Obese Class I</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Height</div>
+      <div class="card-value">5'11"</div>
+      <div class="card-sub">71 inches / 180 cm</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Age</div>
+      <div class="card-value">42</div>
+      <div class="card-sub">Born Sep 23, 1983</div>
+    </div>
+  </div>
+
+  <!-- ── DEXA SCAN JUNE 2023 ── -->
+  <div class="section-title">DEXA Scan — BodySpec · June 22, 2023 (Baseline)</div>
+
+  <div class="scan-header">
+    <div>
+      <h3>BodySpec Full Body Composition Scan</h3>
+      <div class="date">Measured: June 22, 2023 · Weight at scan: 231.0 lbs · Height: 71.0 in</div>
+    </div>
+    <span class="scan-badge">BASELINE</span>
+  </div>
+
+  <div class="grid-4">
+    <div class="card">
+      <div class="card-label">Total Body Fat %</div>
+      <div class="card-value" style="color:#ef4444">38.5<span class="card-unit">%</span></div>
+      <div class="card-sub bad"><span class="status-dot dot-red"></span>Above 80th percentile (men 30-39)</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Fat Tissue</div>
+      <div class="card-value" style="color:#ef4444">88.7<span class="card-unit">lbs</span></div>
+      <div class="card-sub bad">Target: ~46 lbs at 20% body fat</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Lean Tissue (Muscle)</div>
+      <div class="card-value" style="color:#4f8ef7">135.1<span class="card-unit">lbs</span></div>
+      <div class="card-sub warn">Below avg for 5'11" male (150–165 lbs)</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Bone Mineral Content</div>
+      <div class="card-value" style="color:#22c55e">6.6<span class="card-unit">lbs</span></div>
+      <div class="card-sub good">Z-Score 0.8 · 69–93rd percentile</div>
+    </div>
+    <div class="card">
+      <div class="card-label">VAT (Visceral Fat)</div>
+      <div class="card-value" style="color:#ef4444">3.71<span class="card-unit">lbs</span></div>
+      <div class="card-sub bad"><span class="status-dot dot-red"></span>HIGH · Target is near zero (&lt;1 lb)</div>
+    </div>
+    <div class="card">
+      <div class="card-label">VAT Volume</div>
+      <div class="card-value" style="color:#ef4444">108.97<span class="card-unit">in³</span></div>
+      <div class="card-sub bad">Metabolic disease risk zone</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Android/Gynoid Ratio</div>
+      <div class="card-value" style="color:#ef4444">1.23</div>
+      <div class="card-sub bad"><span class="status-dot dot-red"></span>HIGH · Target &lt;1.0 (belly-dominant)</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Resting Metabolic Rate</div>
+      <div class="card-value" style="color:#a78bfa">1,679<span class="card-unit">cal</span></div>
+      <div class="card-sub">Minimum daily calories at rest</div>
+    </div>
+  </div>
+
+  <!-- ── BODY FAT PERCENTILE ── -->
+  <div class="section-title">Body Fat Percentile Context (Men, Age 40–49)</div>
+  <div class="card" style="padding: 24px;">
+    <div style="margin-bottom: 16px; font-size: 0.85rem; color: var(--label);">
+      Your body fat at time of scan was <strong style="color:#ef4444">38.5%</strong>. Reference ranges for men aged 30-39 (your age at scan):
+    </div>
+    <div class="bar-wrap">
+      <div class="bar-label"><span>0–20th percentile (Lean)</span><span>&lt;18%</span></div>
+      <div class="bar-bg"><div class="bar-fill bar-green" style="width:18%"></div></div>
+    </div>
+    <div class="bar-wrap">
+      <div class="bar-label"><span>20–40th percentile</span><span>18–22%</span></div>
+      <div class="bar-bg"><div class="bar-fill bar-yellow" style="width:22%"></div></div>
+    </div>
+    <div class="bar-wrap">
+      <div class="bar-label"><span>40–60th percentile</span><span>22–26%</span></div>
+      <div class="bar-bg"><div class="bar-fill bar-yellow" style="width:26%"></div></div>
+    </div>
+    <div class="bar-wrap">
+      <div class="bar-label"><span>60–80th percentile</span><span>26–30%</span></div>
+      <div class="bar-bg"><div class="bar-fill bar-orange" style="width:30%"></div></div>
+    </div>
+    <div class="bar-wrap">
+      <div class="bar-label">
+        <span>80–99th percentile <strong style="color:#ef4444">← Sandeep at 38.5%</strong></span>
+        <span style="color:#ef4444">&gt;30%</span>
+      </div>
+      <div class="bar-bg"><div class="bar-fill bar-red" style="width:80%"></div></div>
+    </div>
+    <div style="margin-top: 16px; font-size: 0.82rem; color: var(--muted);">
+      Target zone: <strong style="color:#22c55e">18–22%</strong> body fat · To lose ~46 lbs of fat while preserving muscle.
+    </div>
+  </div>
+
+  <!-- ── REGIONAL BREAKDOWN ── -->
+  <div class="section-title">Regional Body Composition (DEXA June 2023)</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-label" style="margin-bottom:12px;">Regional Fat & Lean Breakdown</div>
+      <table class="region-table">
+        <thead>
+          <tr>
+            <th>Region</th>
+            <th>Fat %</th>
+            <th>Fat (lbs)</th>
+            <th>Lean (lbs)</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Arms</td>
+            <td style="color:#f97316">33.6%</td>
+            <td>9.3</td>
+            <td style="color:#4f8ef7">17.5</td>
+            <td>27.7</td>
+          </tr>
+          <tr>
+            <td>Legs</td>
+            <td style="color:#f97316">36.7%</td>
+            <td>29.3</td>
+            <td style="color:#4f8ef7">48.1</td>
+            <td>80.1</td>
+          </tr>
+          <tr>
+            <td>Trunk</td>
+            <td style="color:#ef4444">42.8%</td>
+            <td>48.0</td>
+            <td style="color:#4f8ef7">62.2</td>
+            <td>112.1</td>
+          </tr>
+          <tr>
+            <td>Android (belly)</td>
+            <td style="color:#ef4444">48.4%</td>
+            <td>9.4</td>
+            <td>10.0</td>
+            <td>19.5</td>
+          </tr>
+          <tr>
+            <td>Gynoid (hips)</td>
+            <td style="color:#f97316">39.3%</td>
+            <td>13.1</td>
+            <td>20.2</td>
+            <td>33.9</td>
+          </tr>
+          <tr class="total">
+            <td>TOTAL</td>
+            <td style="color:#ef4444">38.5%</td>
+            <td style="color:#ef4444">88.7</td>
+            <td style="color:#4f8ef7">135.1</td>
+            <td>230.5</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-label" style="margin-bottom:12px;">Muscle Balance (Left vs Right)</div>
+      <table class="region-table">
+        <thead>
+          <tr>
+            <th>Limb</th>
+            <th>Fat %</th>
+            <th>Lean (lbs)</th>
+            <th>Total (lbs)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Right Arm</td>
+            <td>33.6%</td>
+            <td style="color:#4f8ef7">8.7</td>
+            <td>13.8</td>
+          </tr>
+          <tr>
+            <td>Left Arm</td>
+            <td>33.6%</td>
+            <td style="color:#4f8ef7">8.7</td>
+            <td>13.8</td>
+          </tr>
+          <tr>
+            <td>Right Leg</td>
+            <td>37.4%</td>
+            <td style="color:#4f8ef7">23.3</td>
+            <td>39.3</td>
+          </tr>
+          <tr>
+            <td>Left Leg</td>
+            <td>36.0%</td>
+            <td style="color:#4f8ef7">24.8</td>
+            <td>40.8</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="margin-top: 14px;">
+        <div class="alert alert-green">
+          <span class="alert-icon">✅</span>
+          <span>Arms perfectly balanced (0.0 lb difference)</span>
+        </div>
+        <div class="alert alert-yellow">
+          <span class="alert-icon">⚠️</span>
+          <span>Legs: 1.5 lb lean difference (R: 23.3 vs L: 24.8) — minor, within normal range (&lt;2 lbs)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── BONE DENSITY ── -->
+  <div class="section-title">Bone Density Report (DEXA June 2023)</div>
+  <div class="card">
+    <div style="display:flex; gap:32px; flex-wrap:wrap; align-items:flex-start;">
+      <div>
+        <div class="card-label">Overall Bone Mineral Density</div>
+        <div style="font-size:1.8rem; font-weight:700; color:#22c55e">1.283 <span style="font-size:0.9rem; color:var(--muted)">g/cm²</span></div>
+        <div style="font-size:0.8rem; color:var(--muted); margin-top:4px;">T-Score: 0.8 · Z-Score: 0.8</div>
+      </div>
+      <div>
+        <div class="card-label">Percentile vs Age-Matched Peers</div>
+        <div style="font-size:1.8rem; font-weight:700; color:#22c55e">69–93rd <span style="font-size:0.9rem; color:var(--muted)">%ile</span></div>
+        <div style="font-size:0.8rem; color:var(--muted); margin-top:4px;">Strong, healthy bones</div>
+      </div>
+      <div style="flex:1; min-width:200px;">
+        <div class="bar-wrap">
+          <div class="bar-label"><span>Your Z-Score: 0.8</span><span>69–93rd %ile</span></div>
+          <div class="bar-bg"><div class="bar-fill bar-green" style="width:72%"></div></div>
+        </div>
+        <div style="font-size:0.78rem; color:var(--muted); margin-top:8px;">Higher Z-score = better bone density vs age-matched peers. 0.8 is solidly above average.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── KEY ALERTS ── -->
+  <div class="section-title">Key Findings & Action Items</div>
+  <div class="alert alert-red">
+    <span class="alert-icon">🚨</span>
+    <div><strong>VAT (Visceral Fat) is HIGH at 3.71 lbs / 108.97 in³</strong> — This is the most dangerous finding. Visceral fat wraps around your organs and drives metabolic disease (T2 diabetes, heart disease). Target is near zero. This is the #1 priority to address.</div>
+  </div>
+  <div class="alert alert-red">
+    <span class="alert-icon">🚨</span>
+    <div><strong>Android/Gynoid Ratio = 1.23 (target &lt;1.0)</strong> — You carry disproportionate belly fat vs hip fat. Android (belly) fat at 48.4% is highest of all regions. Central obesity pattern confirmed.</div>
+  </div>
+  <div class="alert alert-orange">
+    <span class="alert-icon">⚠️</span>
+    <div><strong>Body fat 38.5% — above 80th percentile for men 30-39</strong> — To reach healthy range (18-22%), you'd need to lose approximately 38–46 lbs of fat while preserving or growing lean mass.</div>
+  </div>
+  <div class="alert alert-orange">
+    <span class="alert-icon">⚠️</span>
+    <div><strong>Lean mass (135.1 lbs) is below average for height</strong> — Average for a 5'11" male is 150–165 lbs. You have 15–30 lbs less muscle than expected. Combined with high fat, this is a classic "skinny fat" pattern despite weight.</div>
+  </div>
+  <div class="alert alert-green">
+    <span class="alert-icon">✅</span>
+    <div><strong>Cardiovascular vitals are excellent</strong> — BP 115/66 and resting HR 58 bpm suggest real cardiovascular fitness despite body composition. This is a meaningful asset.</div>
+  </div>
+  <div class="alert alert-green">
+    <span class="alert-icon">✅</span>
+    <div><strong>Bone density Z-score 0.8 — top 30% for age</strong> — Strong, healthy bones. No osteopenia risk.</div>
+  </div>
+  <div class="alert alert-yellow">
+    <span class="alert-icon">💡</span>
+    <div><strong>RMR 1,679 cal/day</strong> — Your body burns this at complete rest. Total daily expenditure with activity is likely 2,200–2,800 cal. A 500 cal/day deficit = ~1 lb fat loss per week without touching muscle.</div>
+  </div>
+
+  <!-- ── TARGETS ── -->
+  <div class="section-title">Goal Targets for Next DEXA Scan</div>
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-label">Body Fat % Goal</div>
+      <div class="card-value" style="color:#22c55e">22–25<span class="card-unit">%</span></div>
+      <div class="card-sub">From 38.5% · Reduce by ~13–16 pts</div>
+      <div style="margin-top:12px;">
+        <div class="bar-wrap">
+          <div class="bar-label"><span>Progress</span><span>0%</span></div>
+          <div class="bar-bg"><div class="bar-fill bar-blue" style="width:0%"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label">Lean Mass Goal</div>
+      <div class="card-value" style="color:#4f8ef7">150<span class="card-unit">lbs</span></div>
+      <div class="card-sub">From 135.1 lbs · +15 lbs muscle</div>
+      <div style="margin-top:12px;">
+        <div class="bar-wrap">
+          <div class="bar-label"><span>Progress</span><span>0%</span></div>
+          <div class="bar-bg"><div class="bar-fill bar-purple" style="width:0%"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label">VAT Goal</div>
+      <div class="card-value" style="color:#22c55e">&lt;1<span class="card-unit">lb</span></div>
+      <div class="card-sub">From 3.71 lbs · Reduce by ~2.7 lbs</div>
+      <div style="margin-top:12px;">
+        <div class="bar-wrap">
+          <div class="bar-label"><span>Progress</span><span>0%</span></div>
+          <div class="bar-bg"><div class="bar-fill bar-green" style="width:0%"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TIMELINE ── -->
+  <div class="section-title">Scan & Health Timeline</div>
+  <div class="card" style="padding:24px 28px;">
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-dot tl-dot-blue"></div>
+        <div class="tl-date">June 22, 2023</div>
+        <div class="tl-title">BodySpec DEXA Scan — Baseline</div>
+        <div class="tl-sub">231 lbs · 38.5% body fat · 135.1 lbs lean · VAT 3.71 lbs</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot tl-dot-blue"></div>
+        <div class="tl-date">June 12, 2026</div>
+        <div class="tl-title">Vitals Recorded</div>
+        <div class="tl-sub">240 lbs · BP 115/66 · HR 58 bpm · O₂ 100% · BMI 33.52</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot tl-dot-gray"></div>
+        <div class="tl-date">Coming Soon</div>
+        <div class="tl-title">Next BodySpec DEXA Scan — Follow-up</div>
+        <div class="tl-sub">Will compare fat, lean mass, VAT, and regional changes vs June 2023 baseline</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RECOMMENDED LABS ── -->
+  <div class="section-title">Recommended Lab Tests (Not Yet Recorded)</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-label" style="margin-bottom:10px;">Priority Labs</div>
+      <div style="font-size:0.85rem; display:flex; flex-direction:column; gap:8px;">
+        <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--border)">
+          <span>HbA1c / Fasting Glucose</span><span style="color:#f97316">HIGH PRIORITY</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--border)">
+          <span>ApoB</span><span style="color:#f97316">HIGH PRIORITY</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--border)">
+          <span>Lp(a) — Lipoprotein little-a</span><span style="color:#f97316">HIGH PRIORITY</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--border)">
+          <span>Fasting Insulin</span><span style="color:#f59e0b">MEDIUM</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--border)">
+          <span>ALT / AST (Liver enzymes)</span><span style="color:#f59e0b">MEDIUM</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:6px 0;">
+          <span>Sleep Study (rule out apnea)</span><span style="color:#f59e0b">MEDIUM</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label" style="margin-bottom:10px;">Why VAT is Your #1 Target</div>
+      <div style="font-size:0.83rem; color:var(--label); line-height:1.7;">
+        <p style="margin-bottom:8px;">Visceral fat (VAT) at <strong style="color:#ef4444">3.71 lbs</strong> directly drives:</p>
+        <ul style="padding-left:16px; display:flex; flex-direction:column; gap:4px;">
+          <li>Insulin resistance → Type 2 diabetes</li>
+          <li>Chronic inflammation → heart disease</li>
+          <li>Elevated ApoB / small LDL particles</li>
+          <li>Non-alcoholic fatty liver (NAFLD)</li>
+          <li>Hormonal disruption (lower testosterone)</li>
+        </ul>
+        <p style="margin-top:10px; color:var(--muted);">Even a 10% reduction in visceral fat meaningfully reduces these risks. Diet (especially low-carb/time-restricted eating) reduces VAT faster than exercise alone.</p>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  Personal health data — private · Last updated June 12, 2026 · Built with Claude Code
+</footer>
+
+</body>
+</html>
